@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Практикум: Лабораторные работы №1–2 — ООП на C#</title>
+<style>
+  :root {
+    --bg: #f4f7f8;
+    --panel: #ffffff;
+    --text: #202832;
+    --text-dim: #5b6772;
+    --border: #dfe6ea;
+    --brand-dark: #0f3d5c;
+    --brand: #0f5c6e;
+    --brand-teal: #0f8a8a;
+    --brand-light: #eaf4fb;
+    --ok-bg: #eaf7ee;
+    --ok-border: #2f9e56;
+    --ok-text: #1f6e3b;
+    --warn-bg: #fff7e6;
+    --warn-border: #d1a13a;
+    --warn-text: #8a6516;
+    --err-bg: #fdeeea;
+    --err-border: #d9532c;
+    --err-text: #b8401d;
+    --code-bg: #1e2733;
+    --code-text: #d7e3ea;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10151a;
+      --panel: #171f26;
+      --text: #e7edf1;
+      --text-dim: #9fb0ba;
+      --border: #2a343c;
+      --brand-light: #17313f;
+      --code-bg: #0d1319;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10151a;
+    --panel: #171f26;
+    --text: #e7edf1;
+    --text-dim: #9fb0ba;
+    --border: #2a343c;
+    --brand-light: #17313f;
+    --code-bg: #0d1319;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "DejaVu Sans", sans-serif;
+    line-height: 1.55;
+    -webkit-user-select: none; user-select: none; /* блокируем выделение везде по умолчанию */
+  }
+  /* но в текстовых полях студент должен свободно печатать */
+  textarea, input { -webkit-user-select: text; user-select: text; }
+  p, li, .selectable { -webkit-user-select: text; user-select: text; } /* обычный текст пусть выделяется — это не код */
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: linear-gradient(180deg, var(--brand-dark), var(--brand));
+    color: #fff; padding: 14px 20px calc(14px + env(safe-area-inset-top, 0px)) 20px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  }
+  .topbar .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .topbar h1 { font-size: 15px; margin: 0; font-weight: 700; letter-spacing: 0.2px; }
+  .topbar .sub { font-size: 11.5px; opacity: 0.8; margin-top: 2px; }
+  .progress-wrap { max-width: 720px; margin: 10px auto 0 auto; }
+  .progress-track { background: rgba(255,255,255,0.18); border-radius: 20px; height: 7px; overflow: hidden; }
+  .progress-fill { background: #7fe0d6; height: 100%; border-radius: 20px; transition: width .3s ease; }
+  .progress-label { font-size: 10.5px; opacity: 0.85; margin-top: 5px; display:flex; justify-content: space-between; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 18px 16px 60px 16px; }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 18px; margin-bottom: 16px;
+  }
+  .tag {
+    display:inline-block; background: var(--brand-light); color: var(--brand);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 8px;
+  }
+  h2 { font-size: 19px; color: var(--brand-dark); margin: 0 0 10px 0; }
+  h3 { font-size: 14.5px; color: var(--brand-dark); margin: 16px 0 6px 0; }
+  p { margin: 0 0 10px 0; color: var(--text); }
+  ul, ol { margin: 0 0 10px 0; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  b { color: var(--brand-dark); }
+  :root[data-theme="dark"] b, @media (prefers-color-scheme: dark) { }
+  .btn-tag {
+    display:inline-block; background: var(--brand-light); border: 1px solid var(--border);
+    color: var(--brand); border-radius: 5px; padding: 1px 7px; font-size: 12.5px; font-weight: 700;
+  }
+  .kbd {
+    display:inline-block; background: #2a333d; color: #e8eef2; border-radius: 5px;
+    padding: 1px 7px; font-family: "SFMono-Regular", Menlo, monospace; font-size: 12px;
+  }
+
+  .callout { border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: 13.5px; }
+  .callout .ct { font-weight: 700; display:block; margin-bottom: 3px; }
+  .callout.info { background: var(--brand-light); border-left: 4px solid var(--brand); }
+  .callout.info .ct { color: var(--brand); }
+  .callout.warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+  .callout.warn .ct { color: var(--warn-text); }
+  .callout.ok { background: var(--ok-bg); border-left: 4px solid var(--ok-border); }
+  .callout.ok .ct { color: var(--ok-text); }
+
+  .step { display: flex; margin-bottom: 12px; gap: 10px; }
+  .step .num {
+    background: var(--brand-teal); color: #fff; min-width: 24px; height: 24px; border-radius: 50%;
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 12px; flex-shrink:0;
+  }
+  .step .txt { padding-top: 2px; }
+
+  /* --- защищённый блок кода (не выделяется, копирование блокируется) --- */
+  .codebox-label {
+    display:inline-block; background: var(--brand-dark); color:#dff3f1; font-family: Menlo, monospace;
+    font-size: 11px; padding: 4px 10px; border-radius: 5px 5px 0 0; margin: 10px 0 -6px 0;
+  }
+  .codebox {
+    background: var(--code-bg); color: var(--code-text); font-family: "SFMono-Regular", Menlo, monospace;
+    font-size: 12px; border-radius: 8px; padding: 12px 14px; margin: 6px 0 4px 0;
+    white-space: pre; overflow-x: auto; line-height: 1.5;
+    -webkit-user-select: none !important; user-select: none !important;
+    position: relative;
+  }
+  .codebox::after {
+    content: "🔒 нельзя скопировать — впишите ниже сами";
+    display: block; font-size: 10px; opacity: 0.55; margin-top: 8px; user-select: none;
+  }
+
+  .challenge {
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 14px 0; background: var(--bg);
+  }
+  .challenge textarea {
+    width: 100%; min-height: 120px; font-family: "SFMono-Regular", Menlo, monospace; font-size: 12.5px;
+    border-radius: 8px; border: 1.5px solid var(--border); background: var(--panel); color: var(--text);
+    padding: 10px; resize: vertical; line-height: 1.5; tab-size: 4;
+  }
+  .challenge textarea:focus { outline: none; border-color: var(--brand-teal); }
+  .challenge .row2 { display:flex; gap:8px; align-items:center; margin-top: 8px; flex-wrap: wrap; }
+  .check-btn {
+    background: var(--brand); color:#fff; border:none; border-radius: 7px; padding: 8px 16px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  .check-btn:hover { background: var(--brand-dark); }
+  .result-msg { font-size: 12.5px; font-weight: 600; }
+  .result-msg.ok { color: var(--ok-text); }
+  .result-msg.err { color: var(--err-text); }
+  .done-badge {
+    display:inline-block; background: var(--ok-bg); color: var(--ok-text); border: 1px solid var(--ok-border);
+    border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-left: 6px;
+  }
+  .why-box {
+    background: var(--brand-light); border-radius: 8px; padding: 9px 13px; margin: 0 0 4px 0;
+    font-size: 12.5px; color: var(--text);
+  }
+  .nav-row { display:flex; justify-content: space-between; align-items:center; margin-top: 10px; gap: 10px; }
+  .nav-btn {
+    background: var(--brand-teal); color:#fff; border:none; border-radius: 9px; padding: 12px 20px;
+    font-size: 14px; font-weight: 700; cursor: pointer; flex: 1;
+  }
+  .nav-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .nav-btn.secondary { background: transparent; color: var(--brand); border: 1.5px solid var(--border); flex: 0 0 auto; }
+
+  .toc { display: grid; gap: 6px; margin: 14px 0; }
+  .toc-item {
+    display:flex; align-items:center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); cursor: pointer; background: var(--panel);
+  }
+  .toc-item.current { border-color: var(--brand-teal); background: var(--brand-light); }
+  .toc-item.locked { opacity: 0.5; cursor: not-allowed; }
+  .toc-num {
+    min-width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--text-dim);
+    display:flex; align-items:center; justify-content:center; font-size: 11px; font-weight: 700; flex-shrink:0;
+  }
+  .toc-item.current .toc-num { background: var(--brand-teal); color: #fff; }
+  .toc-item.complete .toc-num { background: var(--ok-border); color: #fff; }
+  .toc-title { font-size: 13px; }
+
+  footer.pagefoot { text-align:center; color: var(--text-dim); font-size: 11px; padding: 10px 0 30px 0; }
+
+  .reset-link { color: var(--text-dim); font-size: 11px; text-decoration: underline; cursor: pointer; background:none; border:none; padding: 0; }
+
+  /* --- вход по имени --- */
+  .gate { max-width: 420px; margin: 60px auto; padding: 0 16px; }
+  .gate .card { text-align: center; }
+  .gate input {
+    width: 100%; padding: 11px 13px; margin: 8px 0; border-radius: 8px;
+    border: 1.5px solid var(--border); background: var(--panel); color: var(--text); font-size: 14px;
+  }
+  .gate input:focus { outline: none; border-color: var(--brand-teal); }
+  .gate-btn {
+    width: 100%; background: var(--brand-teal); color:#fff; border:none; border-radius: 9px;
+    padding: 13px; font-size: 14.5px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .gate-btn:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+  .gate-err { color: var(--err-text); font-size: 12px; margin-top: 6px; min-height: 16px; }
+
+  /* --- отчёт для преподавателя --- */
+  .report-box {
+    background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 12px 14px;
+    font-family: "SFMono-Regular", Menlo, monospace; font-size: 12px; white-space: pre-wrap;
+    -webkit-user-select: text; user-select: text; margin: 10px 0;
+  }
+  .copy-btn {
+    background: var(--brand-dark); color:#fff; border:none; border-radius: 8px; padding: 10px 18px;
+    font-size: 13.5px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  }
+  .copy-btn.copied { background: var(--ok-border); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,15,20,0.55); z-index: 50;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-card {
+    background: var(--panel); border-radius: 12px; padding: 20px; max-width: 460px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
+  }
+  .modal-close {
+    float: right; background: none; border: none; font-size: 18px; color: var(--text-dim); cursor: pointer;
+  }
+
+  ::selection { background: transparent; }
+  textarea::selection, input::selection, p::selection, li::selection { background: #b7d9e8; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="row">
+    <div>
+      <h1>Практикум: Лаб. работы №1–2 — ООП на C#</h1>
+      <div class="sub" id="subLabel">Классы, объекты, принципы ООП и модификаторы доступа — пишите код сами</div>
+    </div>
+    <div style="text-align:right;">
+      <div id="studentLabel" style="font-size:11.5px; color:#dff3f1; margin-bottom:3px;"></div>
+      <button class="reset-link" onclick="toggleReportModal(true)" style="color:#dff3f1; margin-right:10px;">Отчёт о прогрессе</button>
+      <button class="reset-link" onclick="resetProgress()" style="color:#dff3f1;">Сбросить прогресс</button>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progressText">Часть 1 из 18</span><span id="progressPct">0%</span></div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<footer class="pagefoot">Код в тёмных блоках нельзя выделить и скопировать — его нужно перепечатать в поле ниже, чтобы двигаться дальше.</footer>
+
+<script>
+/* ============================ ДАННЫЕ ЧАСТЕЙ ============================ */
+const PARTS = [
+  {
+    "id": 0,
+    "tag": "Старт",
+    "title": "Что мы будем делать",
+    "html": "\n    <p>Это расширенный практикум по двум лабораторным работам курса «ООП на C#»:\n    <b>Лабораторная работа №1</b> — классы, объекты, конструкторы, статические методы и принципы\n    ООП (абстракция, инкапсуляция, наследование, полиморфизм) на примерах из реальной разработки\n    (платёжный шлюз, учётная запись пользователя, сотрудники IT-отдела); и\n    <b>Лабораторная работа №2</b> — все пять модификаторов доступа C#: private, protected,\n    internal, protected internal, public.</p>\n    <div class=\"step\"><div class=\"num\">1</div><div class=\"txt\">Понадобится среда для C#: Visual Studio (Windows) или JetBrains Rider (macOS и другие ОС) — обе инструкции по созданию проекта есть в сопроводительном документе лабораторных работ.</div></div>\n    <div class=\"step\"><div class=\"num\">2</div><div class=\"txt\">Код в тёмных блоках нельзя скопировать — вы перепечатываете его сами в поле ниже, чтобы открыть следующую часть. Это 14 заданий суммарно из обеих лабораторных работ.</div></div>\n    <div class=\"callout info\"><span class=\"ct\">Зачем печатать руками</span>\n      Когда вы сами набираете код по буквам, мозг замечает структуру, отступы, фигурные скобки и\n      синтаксис — то, что при копипасте проскакивает мимо внимания.</div>\n  ",
+    "challenges": []
+  },
+  {
+    "id": 1,
+    "tag": "Лаб. 1",
+    "title": "Лабораторная работа №1. Классы, объекты и принципы ООП на практике",
+    "html": "<p>Научиться создавать классы и объекты, работать с полями, свойствами, конструкторами и методами, и увидеть на практике, как в коде проявляются абстракция, инкапсуляция, наследование и полиморфизм — на примерах, близких к реальной разработке (платёжный шлюз, учётная запись пользователя, сотрудники IT-отдела).</p><div class=\"callout ok\"><span class=\"ct\">Начинаем</span>Далее — 9 заданий по порядку. Каждое открывает следующее только после правильного повторения кода.</div>",
+    "challenges": []
+  },
+  {
+    "id": 2,
+    "tag": "Лаб.1 · 1",
+    "title": "Класс и объект: первый шаблон",
+    "html": "<p>Начнём с разогрева: создадим простой класс и один объект по его шаблону, чтобы закрепить разницу между классом (шаблоном) и объектом (конкретным экземпляром).</p>",
+    "challenges": [
+      {
+        "filename": "DemoClass.cs — новый файл класса",
+        "why": "DemoClass — это шаблон (класс). demo — конкретный объект, созданный по этому шаблону через new.",
+        "code": "public class DemoClass\n{\n    int field = 0;\n\n    public int Property { get; set; }\n\n    public void Method()\n    {\n        Console.WriteLine(\"Method\");\n    }\n}",
+        "note": "Часть задания «Класс и объект: первый шаблон»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "DemoClass — это шаблон (класс). demo — конкретный объект, созданный по этому шаблону через new.",
+        "code": "DemoClass demo = new DemoClass();\ndemo.Method();",
+        "note": "Ожидаемый вывод в консоли: Method"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "tag": "Лаб.1 · 2",
+    "title": "Конструкторы и инициализация объекта",
+    "html": "<p>Добавьте в DemoClass несколько конструкторов, чтобы объект можно было сразу создавать с нужными начальными значениями.</p>",
+    "challenges": [
+      {
+        "filename": "DemoClass.cs — дополните класс",
+        "why": "this.field = field различает поле объекта и одноимённый параметр конструктора. var — неявное объявление типа переменной.",
+        "code": "public class DemoClass\n{\n    int field;\n    public int Property { get; set; }\n\n    public DemoClass() { }\n\n    public DemoClass(int field)\n    {\n        this.field = field;\n    }\n\n    public DemoClass(int field, int property)\n    {\n        this.field = field;\n        Property = property;\n    }\n\n    public void Method()\n    {\n        Console.WriteLine($\"field: {field}, Property: {Property}\");\n    }\n}",
+        "note": "Часть задания «Конструкторы и инициализация объекта»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "this.field = field различает поле объекта и одноимённый параметр конструктора. var — неявное объявление типа переменной.",
+        "code": "DemoClass d2 = new DemoClass(1);\nd2.Method();\n\nvar d3 = new DemoClass(1, 2);\nd3.Method();\n\nvar d5 = new DemoClass(10) { Property = 11 };\nd5.Method();",
+        "note": "Ожидаемый вывод в консоли: field: 1, Property: 0  |  field: 1, Property: 2  |  field: 10, Property: 11"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "tag": "Лаб.1 · 3",
+    "title": "Статические методы и методы объекта",
+    "html": "<p>Статический метод принадлежит классу целиком и вызывается без создания объекта. Метод объекта требует сначала создать экземпляр класса.</p>",
+    "challenges": [
+      {
+        "filename": "DemoClass.cs — дополните класс",
+        "why": "Console.WriteLine, которым вы пользовались с самого начала, — это тоже статический метод класса Console.",
+        "code": "public static void StaticMethod()\n{\n    Console.WriteLine(\"Message from static method\");\n}\n\npublic void NoneStaticMethod()\n{\n    Console.WriteLine(\"Message from none static method\");\n}",
+        "note": "Часть задания «Статические методы и методы объекта»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Console.WriteLine, которым вы пользовались с самого начала, — это тоже статический метод класса Console.",
+        "code": "DemoClass.StaticMethod();\n\nvar d8 = new DemoClass();\nd8.NoneStaticMethod();",
+        "note": "Ожидаемый вывод в консоли: Message from static method  |  Message from none static method"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "tag": "Лаб.1 · 4",
+    "title": "Метод с аргументом и возвращаемым значением",
+    "html": "<p>Методы могут принимать данные через аргументы и возвращать результат через return.</p>",
+    "challenges": [
+      {
+        "filename": "DemoClass.cs — дополните класс",
+        "why": "Методы могут принимать данные через аргументы и возвращать результат через return.",
+        "code": "public int MulField(int value)\n{\n    return field * value;\n}",
+        "note": "Часть задания «Метод с аргументом и возвращаемым значением»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Методы могут принимать данные через аргументы и возвращать результат через return.",
+        "code": "var d9 = new DemoClass(10);\nConsole.WriteLine($\"MulField() result: {d9.MulField(2)}\");",
+        "note": "Ожидаемый вывод в консоли: MulField() result: 20"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "tag": "Лаб.1 · 5",
+    "title": "Абстракция: интерфейс платёжного шлюза",
+    "html": "<p>Абстракция — когда вызывающему коду виден только интерфейс действия, а детали реализации скрыты. Смоделируем это на примере подключения приёма онлайн-платежей.</p>",
+    "challenges": [
+      {
+        "filename": "IPaymentGateway.cs — новый файл интерфейса",
+        "why": "Коду в Main совершенно не важно, как именно YooKassaGateway обращается к банку внутри ChargePayment — виден только интерфейс IPaymentGateway. Это и есть абстракция.",
+        "code": "public interface IPaymentGateway\n{\n    bool ChargePayment(string cardToken, decimal amount);\n}",
+        "note": "Часть задания «Абстракция: интерфейс платёжного шлюза»."
+      },
+      {
+        "filename": "YooKassaGateway.cs — новый файл класса",
+        "why": "Коду в Main совершенно не важно, как именно YooKassaGateway обращается к банку внутри ChargePayment — виден только интерфейс IPaymentGateway. Это и есть абстракция.",
+        "code": "public class YooKassaGateway : IPaymentGateway\n{\n    public bool ChargePayment(string cardToken, decimal amount)\n    {\n        Console.WriteLine($\"Обращаемся к банку-эквайеру... списываем {amount} руб. по токену {cardToken}\");\n        return true;\n    }\n}",
+        "note": "Часть задания «Абстракция: интерфейс платёжного шлюза»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Коду в Main совершенно не важно, как именно YooKassaGateway обращается к банку внутри ChargePayment — виден только интерфейс IPaymentGateway. Это и есть абстракция.",
+        "code": "IPaymentGateway gateway = new YooKassaGateway();\nbool success = gateway.ChargePayment(\"tok_123456\", 1500m);\nConsole.WriteLine(success ? \"Оплата прошла\" : \"Оплата не прошла\");",
+        "note": "Ожидаемый вывод в консоли: Обращаемся к банку-эквайеру... списываем 1500 руб. по токену tok_123456  |  Оплата прошла"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "tag": "Лаб.1 · 6",
+    "title": "Инкапсуляция: учётная запись пользователя",
+    "html": "<p>Инкапсуляция защищает данные объекта от прямого изменения снаружи. Смоделируем хранение пароля пользователя — так, как это обычно делается в реальных системах: только в виде хэша, и без прямого доступа к нему извне.</p>",
+    "challenges": [
+      {
+        "filename": "UserAccount.cs — новый файл класса",
+        "why": "passwordHash и Hash() скрыты модификатором private — единственный способ проверить пароль снаружи — через метод CheckPassword(). Подробнее о модификаторах — в Лабораторной работе №2.",
+        "code": "public class UserAccount\n{\n    private string login;\n    private string passwordHash;\n\n    public UserAccount(string login, string password)\n    {\n        this.login = login;\n        passwordHash = Hash(password);\n    }\n\n    public bool CheckPassword(string attempt)\n    {\n        return passwordHash == Hash(attempt);\n    }\n\n    private string Hash(string value)\n    {\n        return value.GetHashCode().ToString();\n    }\n}",
+        "note": "Часть задания «Инкапсуляция: учётная запись пользователя»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "passwordHash и Hash() скрыты модификатором private — единственный способ проверить пароль снаружи — через метод CheckPassword(). Подробнее о модификаторах — в Лабораторной работе №2.",
+        "code": "var user = new UserAccount(\"ivanov\", \"qwerty123\");\nConsole.WriteLine(user.CheckPassword(\"qwerty123\"));\nConsole.WriteLine(user.CheckPassword(\"wrongpass\"));\n// user.passwordHash — так обратиться НЕЛЬЗЯ, поле private",
+        "note": "Ожидаемый вывод в консоли: True  |  False"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "tag": "Лаб.1 · 7",
+    "title": "Наследование: иерархия сотрудников IT-отдела",
+    "html": "<p>Наследование позволяет не дублировать общую логику. Создадим базовый класс сотрудника и два класса-наследника для разных ролей в IT-компании.</p>",
+    "challenges": [
+      {
+        "filename": "Employee.cs — новый файл класса",
+        "why": "Developer и Manager наследуют FullName, Experience и конструктор-логику от Employee (через base(...)) и переопределяют (override) только то, что у них своё.",
+        "code": "public class Employee\n{\n    public string FullName { get; set; }\n    public int Experience { get; set; }\n\n    public Employee(string fullName, int experience)\n    {\n        FullName = fullName;\n        Experience = experience;\n    }\n\n    public virtual string GetRoleDescription()\n    {\n        return \"Сотрудник\";\n    }\n}",
+        "note": "Часть задания «Наследование: иерархия сотрудников IT-отдела»."
+      },
+      {
+        "filename": "Developer.cs — новый файл класса",
+        "why": "Developer и Manager наследуют FullName, Experience и конструктор-логику от Employee (через base(...)) и переопределяют (override) только то, что у них своё.",
+        "code": "public class Developer : Employee\n{\n    public string MainLanguage { get; set; }\n\n    public Developer(string fullName, int experience, string mainLanguage)\n        : base(fullName, experience)\n    {\n        MainLanguage = mainLanguage;\n    }\n\n    public override string GetRoleDescription()\n    {\n        return $\"Разработчик на {MainLanguage}\";\n    }\n}",
+        "note": "Часть задания «Наследование: иерархия сотрудников IT-отдела»."
+      },
+      {
+        "filename": "Manager.cs — новый файл класса",
+        "why": "Developer и Manager наследуют FullName, Experience и конструктор-логику от Employee (через base(...)) и переопределяют (override) только то, что у них своё.",
+        "code": "public class Manager : Employee\n{\n    public int TeamSize { get; set; }\n\n    public Manager(string fullName, int experience, int teamSize)\n        : base(fullName, experience)\n    {\n        TeamSize = teamSize;\n    }\n\n    public override string GetRoleDescription()\n    {\n        return $\"Руководитель команды из {TeamSize} человек\";\n    }\n}",
+        "note": "Часть задания «Наследование: иерархия сотрудников IT-отдела»."
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "tag": "Лаб.1 · 8",
+    "title": "Полиморфизм: единый список сотрудников",
+    "html": "<p>Теперь создадим общий список сотрудников разных типов и вызовем у всех один и тот же метод — убедимся, что поведение будет разным.</p>",
+    "challenges": [
+      {
+        "filename": "Program.cs — добавьте в Main (и using System.Collections.Generic; в начало файла)",
+        "why": "Один и тот же вызов person.GetRoleDescription() даёт разный результат в зависимости от реального типа объекта — это и есть полиморфизм.",
+        "code": "List<Employee> staff = new List<Employee>\n{\n    new Developer(\"Иванов Иван\", 3, \"C#\"),\n    new Manager(\"Петрова Анна\", 7, 5)\n};\n\nforeach (var person in staff)\n{\n    Console.WriteLine($\"{person.FullName}: {person.GetRoleDescription()}\");\n}",
+        "note": "Ожидаемый вывод в консоли: Иванов Иван: Разработчик на C#  |  Петрова Анна: Руководитель команды из 5 человек"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "tag": "Лаб.1 · 9",
+    "title": "Задание 9 (обязательное задание курса, КТ № 2). Класс Student",
+    "html": "<p>Это официальное задание курса «Создать класс Student»: создайте класс Student, содержащий поля Name, Age, Group, и несколько объектов этого класса с заполненными значениями.</p>",
+    "challenges": [
+      {
+        "filename": "Student.cs — новый файл класса",
+        "why": "Критерии оценки этого задания: 2 балла — выполнено без ошибок и в срок; 1 балл — выполнено позже срока либо с ошибками, которые студент осознал и исправил.",
+        "code": "public class Student\n{\n    public string Name { get; set; }\n    public int Age { get; set; }\n    public string Group { get; set; }\n}",
+        "note": "Часть задания «Задание 9 (обязательное задание курса, КТ № 2). Класс Student»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Критерии оценки этого задания: 2 балла — выполнено без ошибок и в срок; 1 балл — выполнено позже срока либо с ошибками, которые студент осознал и исправил.",
+        "code": "var s1 = new Student { Name = \"Сидоров Пётр\", Age = 19, Group = \"ИС-21\" };\nvar s2 = new Student { Name = \"Кузнецова Мария\", Age = 20, Group = \"ИС-21\" };\n\nConsole.WriteLine($\"{s1.Name}, {s1.Age} лет, группа {s1.Group}\");\nConsole.WriteLine($\"{s2.Name}, {s2.Age} лет, группа {s2.Group}\");",
+        "note": "Ожидаемый вывод в консоли: Сидоров Пётр, 19 лет, группа ИС-21  |  Кузнецова Мария, 20 лет, группа ИС-21"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "tag": "Лаб. 2",
+    "title": "Лабораторная работа №2. Модификаторы доступа",
+    "html": "<p>Закрепить на практике все модификаторы доступа C# (private, protected, internal, protected internal, public) и научиться осознанно выбирать нужный модификатор для каждого поля и метода.</p><div class=\"callout ok\"><span class=\"ct\">Продолжаем</span>Далее — 5 заданий по модификаторам доступа.</div>",
+    "challenges": []
+  },
+  {
+    "id": 12,
+    "tag": "Лаб.2 · 1",
+    "title": "private — модификатор по умолчанию",
+    "html": "<p>Если модификатор не указан явно, член класса по умолчанию private — доступен только внутри своего класса.</p>",
+    "challenges": [
+      {
+        "filename": "Modifiers.cs — новый файл класса",
+        "why": "Раскомментировав вызов Modifiers.AAA() в Main, вы увидите ошибку компиляции: 'Modifiers.AAA()' is inaccessible due to its protection level. Снова закомментируйте строку перед тем, как двигаться дальше.",
+        "code": "class Modifiers\n{\n    static void AAA()\n    {\n        Console.WriteLine(\"Modifiers AAA\");\n    }\n\n    public static void BBB()\n    {\n        Console.WriteLine(\"Modifiers BBB\");\n        AAA();\n    }\n}",
+        "note": "Часть задания «private — модификатор по умолчанию»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Раскомментировав вызов Modifiers.AAA() в Main, вы увидите ошибку компиляции: 'Modifiers.AAA()' is inaccessible due to its protection level. Снова закомментируйте строку перед тем, как двигаться дальше.",
+        "code": "Modifiers.BBB();\n// Modifiers.AAA(); // раскомментируйте и посмотрите на ошибку компиляции",
+        "note": "Ожидаемый вывод в консоли: Modifiers BBB  |  Modifiers AAA"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "tag": "Лаб.2 · 2",
+    "title": "protected — базовый API-клиент",
+    "html": "<p>protected открывает член только своему классу и классам-наследникам. Смоделируем базовый класс для обращения к внешним API — частая задача в реальной разработке.</p>",
+    "challenges": [
+      {
+        "filename": "ApiClientBase.cs — новый файл класса (добавьте using System.Net.Http; в начало файла)",
+        "why": "VkApiClient пользуется защищённым методом GetHttpClient() изнутри — потому что он наследник ApiClientBase. А вот код в Main обратиться к нему напрямую не может.",
+        "code": "public class ApiClientBase\n{\n    protected HttpClient GetHttpClient()\n    {\n        Console.WriteLine(\"Создаём настроенный HttpClient с таймаутом и заголовками...\");\n        return new HttpClient();\n    }\n}",
+        "note": "Часть задания «protected — базовый API-клиент»."
+      },
+      {
+        "filename": "VkApiClient.cs — новый файл класса",
+        "why": "VkApiClient пользуется защищённым методом GetHttpClient() изнутри — потому что он наследник ApiClientBase. А вот код в Main обратиться к нему напрямую не может.",
+        "code": "public class VkApiClient : ApiClientBase\n{\n    public void LoadFriends()\n    {\n        var client = GetHttpClient();\n        Console.WriteLine(\"Загружаем список друзей через VK API...\");\n    }\n}",
+        "note": "Часть задания «protected — базовый API-клиент»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "VkApiClient пользуется защищённым методом GetHttpClient() изнутри — потому что он наследник ApiClientBase. А вот код в Main обратиться к нему напрямую не может.",
+        "code": "var vk = new VkApiClient();\nvk.LoadFriends();\n// var client = vk.GetHttpClient(); // ОШИБКА: GetHttpClient защищён (protected)",
+        "note": "Ожидаемый вывод в консоли: Создаём настроенный HttpClient с таймаутом и заголовками...  |  Загружаем список друзей через VK API..."
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "tag": "Лаб.2 · 3",
+    "title": "internal и две сборки",
+    "html": "<p>internal открывает доступ только коду внутри той же сборки. Чтобы увидеть это на практике, добавим в решение второй проект — библиотеку классов — и подключим её к основному проекту.</p><div class=\"callout warn\"><span class=\"ct\">Доп. шаг — Visual Studio</span>Visual Studio: правый клик на решении (Solution) в Solution Explorer → Add → New Project → выберите шаблон «Библиотека классов» (Class Library) для C# → назовите проект CompanyInternal.Logging → Создать. Затем подключите ссылку: правый клик на проекте OopLab2 → Add → Project Reference... → поставьте галочку напротив CompanyInternal.Logging → OK.</div><div class=\"callout warn\"><span class=\"ct\">Доп. шаг — JetBrains Rider</span>JetBrains Rider: правый клик на решении (Solution) в дереве слева → New → Project → выберите Class Library для C# → назовите проект CompanyInternal.Logging → Create. Затем правый клик на проекте OopLab2 → Add Reference... → выберите CompanyInternal.Logging → Add.</div>",
+    "challenges": [
+      {
+        "filename": "В проекте CompanyInternal.Logging: AuditLogger.cs",
+        "why": "Раскомментируйте строку с AuditLogger.Log(...) и убедитесь, что проект не компилируется с ошибкой доступа — затем закомментируйте её обратно. CompanyInternal.Logging и OopLab2 — это две разные сборки, поэтому internal-класс одной из них не виден в другой.",
+        "code": "namespace CompanyInternal.Logging\n{\n    internal class AuditLogger\n    {\n        public static void Log(string action)\n        {\n            Console.WriteLine($\"[AUDIT] {action}\");\n        }\n    }\n}",
+        "note": "Часть задания «internal и две сборки»."
+      },
+      {
+        "filename": "Program.cs основного проекта OopLab2 — добавьте using CompanyInternal.Logging; и в Main",
+        "why": "Раскомментируйте строку с AuditLogger.Log(...) и убедитесь, что проект не компилируется с ошибкой доступа — затем закомментируйте её обратно. CompanyInternal.Logging и OopLab2 — это две разные сборки, поэтому internal-класс одной из них не виден в другой.",
+        "code": "// AuditLogger.Log(\"Тестовое действие\"); // ОШИБКА: класс internal, недоступен из другой сборки\nConsole.WriteLine(\"AuditLogger специально недоступен из этого проекта — это и демонстрирует internal\");",
+        "note": "Ожидаемый вывод в консоли: AuditLogger специально недоступен из этого проекта — это и демонстрирует internal"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "tag": "Лаб.2 · 4",
+    "title": "protected internal",
+    "html": "<p>protected internal сочетает оба правила: доступ открыт и коду внутри той же сборки, и классам-наследникам за её пределами.</p>",
+    "challenges": [
+      {
+        "filename": "ProtectedInternalDemo.cs — новый файл в основном проекте OopLab2",
+        "why": "ClassC не является наследником ClassA, но получает доступ к MethodClassA() просто потому, что оба класса находятся в одной сборке (OopLab2). ClassB получил бы доступ в любом случае — он наследник.",
+        "code": "public class ClassA\n{\n    protected internal void MethodClassA()\n    {\n        Console.WriteLine(\"ClassA.MethodClassA() выполнен\");\n    }\n}\n\npublic class ClassB : ClassA\n{\n    protected internal void MethodClassB()\n    {\n        MethodClassA();\n    }\n}\n\npublic class ClassC\n{\n    public void MethodClassC()\n    {\n        ClassA classA = new ClassA();\n        classA.MethodClassA();\n    }\n}",
+        "note": "Часть задания «protected internal»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "ClassC не является наследником ClassA, но получает доступ к MethodClassA() просто потому, что оба класса находятся в одной сборке (OopLab2). ClassB получил бы доступ в любом случае — он наследник.",
+        "code": "new ClassC().MethodClassC();",
+        "note": "Ожидаемый вывод в консоли: ClassA.MethodClassA() выполнен"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "tag": "Лаб.2 · 5",
+    "title": "Задание 5 (обязательное задание курса, КТ № 3). Класс Student с модификаторами доступа",
+    "html": "<p>Это официальное задание курса: создать класс Student, используя не менее трёх разных модификаторов доступа для его методов, и пояснить в комментариях в коде, почему использован именно этот модификатор.</p>",
+    "challenges": [
+      {
+        "filename": "Student.cs — новый файл класса",
+        "why": "Критерии оценки этого задания: 2 балла — выполнено без ошибок и в срок; 1 балл — выполнено позже срока либо с ошибками, которые студент осознал и исправил.",
+        "code": "public class Student\n{\n    private string name;\n    private int age;\n    private string group;\n\n    public Student(string name, int age, string group)\n    {\n        this.name = name;\n        this.age = age;\n        this.group = group;\n    }\n\n    // public — единственный способ прочитать данные студента извне,\n    // поэтому метод открыт для всех\n    public void PrintInfo()\n    {\n        Console.WriteLine($\"{name}, {age} лет, группа {group}\");\n    }\n\n    // private — внутренняя проверка возраста не должна вызываться\n    // откуда-либо, кроме как из самого класса Student\n    private bool IsAdult()\n    {\n        return age >= 18;\n    }\n\n    // protected — пригодится будущему классу-наследнику,\n    // например Отличник : Student, но не должен быть доступен снаружи\n    protected string GetStatus()\n    {\n        return IsAdult() ? \"совершеннолетний\" : \"несовершеннолетний\";\n    }\n\n    // internal — служебный метод для логирования использования класса\n    // только внутри своего учебного проекта, не для внешних сборок\n    internal void LogAccess()\n    {\n        Console.WriteLine($\"[LOG] Обращение к данным студента {name}\");\n    }\n}",
+        "note": "Часть задания «Задание 5 (обязательное задание курса, КТ № 3). Класс Student с модификаторами доступа»."
+      },
+      {
+        "filename": "Program.cs — добавьте в Main",
+        "why": "Критерии оценки этого задания: 2 балла — выполнено без ошибок и в срок; 1 балл — выполнено позже срока либо с ошибками, которые студент осознал и исправил.",
+        "code": "var student = new Student(\"Фёдоров Олег\", 18, \"ПИ-22\");\nstudent.PrintInfo();\nstudent.LogAccess();",
+        "note": "Ожидаемый вывод в консоли: Фёдоров Олег, 18 лет, группа ПИ-22  |  [LOG] Обращение к данным студента Фёдоров Олег"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "tag": "Финал",
+    "title": "Итог практикума",
+    "html": "\n    <p>Вы перепечатали и разобрали весь материал двух лабораторных работ: классы и объекты,\n    конструкторы, статические методы, абстракцию через интерфейс, инкапсуляцию через private-поля,\n    наследование и полиморфизм через virtual/override — и все пять модификаторов доступа C#\n    (private, protected, internal, protected internal, public) на примерах из реальной разработки.</p>\n    <div class=\"callout ok\"><span class=\"ct\">Готово</span>Загляните в таблицу доступности модификаторов в документе лабораторной работы №2 и сверьтесь с собственными ответами.</div>\n    <h3>Вопросы для самопроверки</h3>\n    <ul>\n      <li>Чем класс отличается от объекта?</li>\n      <li>Для чего нужен конструктор и чем он отличается от обычного метода?</li>\n      <li>В чём разница между статическим методом и методом объекта?</li>\n      <li>Какой принцип ООП иллюстрирует интерфейс IPaymentGateway в задании 5?</li>\n      <li>Почему поле passwordHash в задании 6 сделано private, а не public?</li>\n      <li>Что получает класс Developer от базового класса Employee благодаря наследованию?</li>\n      <li>Почему в задании 8 вызов person.GetRoleDescription() даёт разный результат для разных объектов списка?</li>\n      <li>Какой модификатор доступа действует, если он не указан явно?</li>\n      <li>Почему в задании 2 код в Main не может напрямую вызвать vk.GetHttpClient()?</li>\n      <li>Почему в задании 3 AuditLogger.Log(...) недоступен из проекта OopLab2, хотя на него подключена ссылка?</li>\n      <li>Чем protected internal отличается от просто protected?</li>\n      <li>Какой модификатор вы бы выбрали для метода, который должен логировать действия только внутри своего же проекта, и почему?</li>\n    </ul>\n    <h3>Критерии оценки</h3>\n    <p>Критерии оценки лабораторной работы: 2 балла — работа выполнена без ошибок и в срок; 1 балл — работа выполнена позже срока, либо допущены ошибки, которые студент осознал и исправил.</p>\n  ",
+    "challenges": []
+  }
+];
+
+/* ============================ СОСТОЯНИЕ ============================ */
+const STORAGE_KEY = "csharp-oop-labs12-progress-v1";
+let state = { current: 0, solved: {}, student: null, autoSubmitted: false };
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch (e) { /* нет доступа к storage — работаем в памяти */ }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function resetProgress() {
+  if (!confirm("Сбросить весь прогресс? Имя и группу нужно будет ввести заново.")) return;
+  state = { current: 0, solved: {}, student: null, autoSubmitted: false };
+  saveState();
+  render();
+}
+
+/* ============================ ВХОД ПО ИМЕНИ ============================ */
+function renderGate(err) {
+  const app = document.getElementById("app");
+  document.getElementById("studentLabel").textContent = "";
+  app.innerHTML = `
+    <div class="gate">
+      <div class="card">
+        <h2 style="margin-top:0;">Прежде чем начать</h2>
+        <p>Введите имя и группу — они попадут в итоговый отчёт, который вы в конце пришлёте преподавателю.</p>
+        <input id="gateName" type="text" placeholder="Имя и фамилия" autocomplete="off">
+        <input id="gateGroup" type="text" placeholder="Группа" autocomplete="off">
+        <button class="gate-btn" onclick="submitGate()">Начать практикум</button>
+        <div class="gate-err">${err || ""}</div>
+      </div>
+    </div>
+  `;
+  document.getElementById("gateName").focus();
+}
+function submitGate() {
+  const name = document.getElementById("gateName").value.trim();
+  const group = document.getElementById("gateGroup").value.trim();
+  if (!name || !group) {
+    renderGate("Заполните оба поля, пожалуйста.");
+    return;
+  }
+  state.student = { name, group };
+  saveState();
+  render();
+}
+
+/* ============================ ОТПРАВКА В GOOGLE ФОРМУ ============================ */
+/* ЗАМЕНИТЕ на данные своей НОВОЙ Google-формы для практикума по C# —
+   action берётся из атрибута action тега <form>, entry.XXXXXX — из атрибутов name
+   у нужных полей, как описано в инструкции по созданию формы. */
+const GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSdEFrWtvUU14mwJwOP8k4fjOyAmPihiZEXYTIpei30A7VmqkA/formResponse";
+const GOOGLE_FORM_ENTRIES = {
+  name: "entry.906412044",    // поле «Имя и фамилия»
+  group: "entry.2030083144",  // поле «Группа»
+  status: "entry.1820254398", // поле «Статус»
+  tasks: "entry.873301333"    // поле «Решено заданий»
+};
+const EXPECTED_HOST = "koroglu1990.github.io";
+function sourceIsTrusted() {
+  return location.hostname === EXPECTED_HOST;
+}
+function reportFields() {
+  const total = PARTS.length;
+  let solvedCount = 0, totalChallenges = 0;
+  PARTS.forEach(p => {
+    (p.challenges||[]).forEach((_, i) => { totalChallenges++; if (state.solved[`${p.id}:${i}`]) solvedCount++; });
+    (p.challenges2||[]).forEach((_, i) => { totalChallenges++; if (state.solved[`${p.id}:b${i}`]) solvedCount++; });
+  });
+  const finished = state.current === total - 1 && isPartComplete(PARTS[total-1]);
+  let status = finished ? "практикум пройден полностью" : `дошёл до части ${state.current + 1} из ${total}`;
+  if (!sourceIsTrusted()) {
+    status = `⚠ ИЗМЕНЁННАЯ КОПИЯ (открыто с ${location.hostname || "локального файла"}) — ` + status;
+  }
+  return { name: state.student.name, group: state.student.group, status, tasks: `${solvedCount} из ${totalChallenges}` };
+}
+function submitToGoogleForm() {
+  if (!state.student) return;
+  const fields = reportFields();
+  const iframeName = "gform-submit-frame";
+  let iframe = document.getElementById(iframeName);
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.name = iframeName;
+    iframe.id = iframeName;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+  }
+  const form = document.createElement("form");
+  form.action = GOOGLE_FORM_ACTION;
+  form.method = "POST";
+  form.target = iframeName;
+  form.style.display = "none";
+  Object.keys(GOOGLE_FORM_ENTRIES).forEach(key => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = GOOGLE_FORM_ENTRIES[key];
+    input.value = fields[key];
+    form.appendChild(input);
+  });
+  document.body.appendChild(form);
+  form.submit();
+  setTimeout(() => form.remove(), 1500);
+}
+function sendReport(btnId) {
+  submitToGoogleForm();
+  const btn = document.getElementById(btnId);
+  if (btn) {
+    btn.textContent = "✓ Отправлено преподавателю";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Отправить преподавателю"; btn.classList.remove("copied"); }, 3000);
+  }
+}
+
+/* ============================ ОТЧЁТ (ТЕКСТ, РЕЗЕРВНЫЙ СПОСОБ) ============================ */
+function buildReport() {
+  const f = reportFields();
+  const dt = new Date();
+  const dtStr = dt.toLocaleString("ru-RU");
+  return `Отчёт о выполнении практикума «ООП на C#»
+Студент: ${f.name}
+Группа: ${f.group}
+Дата: ${dtStr}
+Статус: ${f.status}
+Заданий с кодом решено: ${f.tasks}`;
+}
+function copyReport(btnId) {
+  const text = buildReport();
+  const btn = document.getElementById(btnId || "copyReportBtn");
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "✓ Скопировано";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Скопировать отчёт"; btn.classList.remove("copied"); }, 2500);
+  }).catch(() => {
+    btn.textContent = "Не получилось — выделите текст выше вручную";
+  });
+}
+
+let reportModalOpen = false;
+function toggleReportModal(open) {
+  if (!state.student) return;
+  reportModalOpen = open;
+  renderReportModal();
+}
+function renderReportModal() {
+  let existing = document.getElementById("reportModal");
+  if (existing) existing.remove();
+  if (!reportModalOpen) return;
+  const div = document.createElement("div");
+  div.id = "reportModal";
+  div.className = "modal-overlay";
+  div.onclick = (e) => { if (e.target === div) toggleReportModal(false); };
+  div.innerHTML = `
+    <div class="modal-card">
+      <button class="modal-close" onclick="toggleReportModal(false)">✕</button>
+      <h3 style="margin-top:0;">Отчёт о прогрессе на сейчас</h3>
+      <p style="font-size:12.5px;">Можно отправить преподавателю в любой момент, даже если практикум ещё не пройден до конца.</p>
+      <div class="report-box selectable">${escapeHtml(buildReport())}</div>
+      <button class="copy-btn" id="sendReportBtnModal" onclick="sendReport('sendReportBtnModal')">Отправить преподавателю</button>
+      <button class="copy-btn" id="copyReportBtnModal" onclick="copyReport('copyReportBtnModal')" style="background:transparent;color:var(--brand);border:1.5px solid var(--border);">Скопировать текстом (запасной способ)</button>
+    </div>
+  `;
+  document.body.appendChild(div);
+}
+
+/* ============================ ПРОВЕРКА КОДА ============================ */
+function normalize(s) {
+  return s
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map(line => {
+      // сохраняем ведущие отступы как есть — в Python они значимы
+      const indentMatch = line.match(/^[ \t]*/);
+      const indent = indentMatch ? indentMatch[0] : "";
+      let body = line.slice(indent.length).replace(/[ \t]+$/g, ""); // тело строки без хвостовых пробелов
+      // остальные пробелы внутри строки не принципиальны для Python — не будем к ним придираться
+      body = body
+        .replace(/[ \t]+/g, " ")      // несколько пробелов/табов подряд -> один
+        .replace(/\s*\(\s*/g, "(")    // пробелы вокруг ( убираем
+        .replace(/\s*\)\s*/g, ")")    // пробелы вокруг ) убираем
+        .replace(/\s*,\s*/g, ", ")    // пробел после запятой — ровно один, перед — ноль
+        .replace(/\s*:\s*$/g, ":")    // пробел перед двоеточием в конце строки убираем
+        .replace(/\s*=\s*/g, "=");    // пробелы вокруг = убираем (кроме ==, но их это тоже не портит)
+      return indent + body;
+    })
+    .join("\n")
+    .replace(/^\n+|\n+$/g, ""); // пустые строки в начале/конце
+}
+function getChallenge(partId, idx) {
+  const part = PARTS.find(p => p.id === partId);
+  if (typeof idx === "string" && idx.startsWith("b")) {
+    return part.challenges2[parseInt(idx.slice(1), 10)];
+  }
+  return part.challenges[idx];
+}
+function checkChallenge(partId, idx) {
+  const ta = document.getElementById(`ta-${partId}-${idx}`);
+  const msg = document.getElementById(`msg-${partId}-${idx}`);
+  const ch = getChallenge(partId, idx);
+  let typedRaw = ta.value;
+  if (ch.displayCode) {
+    // в показанном коде есть учебные #-комментарии — если студент случайно переписал и их,
+    // не наказываем за это: убираем строки, которые целиком являются комментарием
+    typedRaw = typedRaw.split("\n").filter(line => !/^\s*#/.test(line)).join("\n");
+  }
+  const typed = normalize(typedRaw);
+  const target = normalize(ch.code);
+  if (typed === target) {
+    state.solved[`${partId}:${idx}`] = true;
+    saveState();
+    msg.className = "result-msg ok";
+    msg.textContent = "✓ Совпадает! Можно двигаться дальше.";
+    render();
+  } else {
+    const typedLines = typed.split("\n");
+    const targetLines = target.split("\n");
+    let diffLine = -1;
+    for (let i = 0; i < Math.max(typedLines.length, targetLines.length); i++) {
+      if (typedLines[i] !== targetLines[i]) { diffLine = i + 1; break; }
+    }
+    msg.className = "result-msg err";
+    msg.textContent = diffLine > 0
+      ? `✗ Пока не совпадает. Проверьте строку ${diffLine} — сравните с образцом выше.`
+      : "✗ Пока не совпадает. Сравните внимательно с образцом выше.";
+  }
+}
+
+function isPartComplete(part) {
+  const chals = (part.challenges || []).length;
+  const chals2 = (part.challenges2 || []).length;
+  for (let i = 0; i < chals; i++) if (!state.solved[`${part.id}:${i}`]) return false;
+  for (let i = 0; i < chals2; i++) if (!state.solved[`${part.id}:b${i}`]) return false;
+  return true;
+}
+
+/* ============================ РЕНДЕР ============================ */
+function renderChallenge(part, ch, idx, keySuffix) {
+  const key = keySuffix !== undefined ? `${part.id}:b${idx}` : `${part.id}:${idx}`;
+  const taId = keySuffix !== undefined ? `ta-${part.id}-b${idx}` : `ta-${part.id}-${idx}`;
+  const msgId = keySuffix !== undefined ? `msg-${part.id}-b${idx}` : `msg-${part.id}-${idx}`;
+  const solved = !!state.solved[key];
+  const shownCode = ch.displayCode || ch.code;
+  return `
+    <div class="challenge">
+      ${ch.why ? `<p class="why-box">🎯 ${escapeHtml(ch.why)}</p>` : ""}
+      <span class="codebox-label">${escapeHtml(ch.filename)}</span>
+      <div class="codebox" oncopy="return false" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">${escapeHtml(shownCode)}</div>
+      ${ch.note ? `<p style="font-size:12px;color:var(--text-dim);margin-top:6px;">💡 ${escapeHtml(ch.note)}</p>` : ""}
+      ${ch.displayCode ? `<p style="font-size:12px;color:var(--warn-text);margin-top:4px;">⚠ Строки с # выше — это пояснения, не переписывайте их. Внизу нужен только сам код, без комментариев.</p>` : ""}
+      <textarea id="${taId}" placeholder="Впишите код сюда вручную (без комментариев — как в чистом файле)..." onpaste="return false" ondrop="return false" oncontextmenu="return false" ${solved ? "readonly" : ""}>${solved ? escapeHtml(ch.code) : ""}</textarea>
+      <div class="row2">
+        ${solved
+          ? `<span class="done-badge">✓ Сделано</span>`
+          : `<button class="check-btn" onclick="checkChallenge(${part.id}, ${keySuffix !== undefined ? `'b${idx}'` : idx})">Проверить</button>
+             <span class="result-msg" id="${msgId}"></span>`
+        }
+      </div>
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function render() {
+  if (!state.student) { renderGate(); return; }
+  document.getElementById("studentLabel").textContent = `${state.student.name} · ${state.student.group}`;
+  const part = PARTS[state.current];
+  const app = document.getElementById("app");
+  const total = PARTS.length;
+  const complete = isPartComplete(part);
+
+  let challengesHtml = "";
+  if (part.challenges && part.challenges.length) {
+    challengesHtml += part.challenges.map((ch, i) => renderChallenge(part, ch, i)).join("");
+  }
+  let afterHtml = part.after || "";
+  let challenges2Html = "";
+  if (part.challenges2 && part.challenges2.length) {
+    challenges2Html += part.challenges2.map((ch, i) => renderChallenge(part, ch, i, "b")).join("");
+  }
+  let after2Html = part.after2 || "";
+
+  const reportHtml = (part.id === 14) ? `
+    <h3>Отчёт для преподавателя</h3>
+    <p>Пришлите этот текст преподавателю (в чат, почту или куда он попросил) — это подтверждение, что практикум пройден.</p>
+    <div class="report-box selectable">${escapeHtml(buildReport())}</div>
+    <button class="copy-btn" id="sendReportBtn" onclick="sendReport('sendReportBtn')">Отправить преподавателю</button>
+    <button class="copy-btn" id="copyReportBtn" onclick="copyReport()" style="background:transparent;color:var(--brand);border:1.5px solid var(--border);">Скопировать текстом (запасной способ)</button>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">Отчёт уже отправлен автоматически при переходе на эту страницу. Кнопка нужна, если хотите отправить ещё раз или что-то пошло не так.</p>
+  ` : "";
+
+  app.innerHTML = `
+    <div class="card">
+      <span class="tag">${escapeHtml(part.tag)}</span>
+      <h2>${escapeHtml(part.title)}</h2>
+      ${part.html}
+      ${challengesHtml}
+      ${afterHtml}
+      ${challenges2Html}
+      ${after2Html}
+      ${reportHtml}
+      <div class="nav-row">
+        <button class="nav-btn secondary" onclick="goPrev()" ${state.current === 0 ? "disabled" : ""}>← Назад</button>
+        <button class="nav-btn" onclick="goNext()" ${(!complete || state.current === total - 1) ? "disabled" : ""}>
+          ${state.current === total - 1 ? "Это финал" : (complete ? "Далее →" : "Впишите код выше, чтобы продолжить")}
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">Содержание</h3>
+      <div class="toc">
+        ${PARTS.map((p, i) => {
+          const reachable = i <= state.current || isPartComplete(PARTS[i-1] || {challenges:[]});
+          const done = isPartComplete(p) && i < state.current;
+          const cls = i === state.current ? "current" : (done ? "complete" : (i > state.current && !allPriorComplete(i) ? "locked" : ""));
+          return `<div class="toc-item ${cls}" onclick="${(i <= state.current || allPriorComplete(i)) ? `goTo(${i})` : ''}">
+            <span class="toc-num">${done ? "✓" : i + 1}</span>
+            <span class="toc-title">${escapeHtml(p.title)}</span>
+          </div>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+
+  document.getElementById("progressFill").style.width = `${Math.round((state.current / (total - 1)) * 100)}%`;
+  document.getElementById("progressText").textContent = `Часть ${state.current + 1} из ${total}`;
+  document.getElementById("progressPct").textContent = `${Math.round((state.current / (total - 1)) * 100)}%`;
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+function allPriorComplete(i) {
+  for (let k = 0; k < i; k++) if (!isPartComplete(PARTS[k])) return false;
+  return true;
+}
+function goNext() {
+  if (!isPartComplete(PARTS[state.current])) return;
+  if (state.current < PARTS.length - 1) {
+    state.current++;
+    if (state.current === PARTS.length - 1 && !state.autoSubmitted) {
+      submitToGoogleForm();
+      state.autoSubmitted = true;
+    }
+    saveState();
+    render();
+  }
+}
+function goPrev() {
+  if (state.current > 0) { state.current--; saveState(); render(); }
+}
+function goTo(i) {
+  if (i <= state.current || allPriorComplete(i)) { state.current = i; saveState(); render(); }
+}
+
+/* ============================ ЗАЩИТА ОТ КОПИРОВАНИЯ ============================ */
+document.addEventListener("copy", function(e) {
+  const sel = window.getSelection().toString();
+  const active = document.activeElement;
+  if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) return; // в полях ввода копировать можно
+  e.preventDefault();
+});
+document.addEventListener("contextmenu", function(e) {
+  const active = document.activeElement;
+  if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) return;
+  e.preventDefault();
+});
+document.addEventListener("keydown", function(e) {
+  const active = document.activeElement;
+  const inField = active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT");
+  const key = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && (key === "c" || key === "u") && !inField) {
+    e.preventDefault();
+  }
+  if ((e.ctrlKey || e.metaKey) && key === "s") { e.preventDefault(); }
+});
+
+/* ============================ СТАРТ ============================ */
+loadState();
+if (state.current >= PARTS.length) state.current = 0;
+render();
+</script>
+</body>
+</html>
